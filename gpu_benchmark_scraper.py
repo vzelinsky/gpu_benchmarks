@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import re
 import matplotlib.pyplot as plt
 from ast import literal_eval
+import matplotlib.colors as colors
 
 
 def simple_get(url):
@@ -74,9 +75,9 @@ def plot_gpu_data():
             benchmarks.append(benchmark)
             gpus.append(gpu)
     fig,ax = plt.subplots()
-    sc = plt.scatter(benchmarks, value_scores, cmap=plt.cm.RdYlGn)
-
-    annot = ax.annotate("", xy=(0,0), xytext=(0,20), textcoords="offset points",
+    sc = plt.scatter(benchmarks, value_scores, c=value_scores, s=10, 
+                    norm=colors.LogNorm(), cmap=plt.cm.viridis)
+    annot = ax.annotate("", xy=(0,0), xytext=(-20,20), textcoords="offset points",
                         bbox=dict(boxstyle="round", fc="w"),
                         arrowprops=dict(arrowstyle="->"))
     annot.set_visible(False)
@@ -101,7 +102,9 @@ def plot_gpu_data():
                 if vis:
                     annot.set_visible(False)
                     fig.canvas.draw_idle()
-
+    plt.axis(xmin=0, xmax=max(benchmarks)*1.01, ymin=0, ymax=max(value_scores)*1.03)
+    plt.xlabel("benchmark score")
+    plt.ylabel("value (score/$)")
     fig.canvas.mpl_connect("motion_notify_event", hover)
     plt.show()
 
