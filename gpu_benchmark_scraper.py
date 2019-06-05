@@ -62,7 +62,7 @@ def get_gpu_data():
             file.write(str(gpu) + "\n")
 
 
-def plot_gpu_data():
+def plot_power_value():
     gpus = []
     value_scores = []
     benchmarks = []
@@ -109,6 +109,102 @@ def plot_gpu_data():
     plt.show()
 
 
+def plot_price_value():
+    gpus = []
+    value_scores = []
+    x = []
+    with open("gpu_benchmark_price.txt", "r", encoding="ascii", errors="ignore") as file:
+        for line in file:
+            gpu = literal_eval(line)
+            benchmark = float(gpu[1])
+            price = float(gpu[2])
+            value_scores.append(benchmark/price)
+            x.append(price)
+            gpus.append(gpu)
+    fig,ax = plt.subplots()
+    sc = plt.scatter(x, value_scores, c=value_scores, s=10, 
+                    norm=colors.LogNorm(), cmap=plt.cm.viridis)
+    annot = ax.annotate("", xy=(0,0), xytext=(-20,20), textcoords="offset points",
+                        bbox=dict(boxstyle="round", fc="w"),
+                        arrowprops=dict(arrowstyle="->"))
+    annot.set_visible(False)
+
+    def update_annot(ind):
+        pos = sc.get_offsets()[ind["ind"][0]]
+        annot.xy = pos
+        text = "{}, {}".format(" ".join(list(map(str,ind["ind"]))), 
+                            " ".join([gpus[n][0] for n in ind["ind"]]))
+        annot.set_text(text)
+        annot.get_bbox_patch().set_alpha(0.4)
+
+    def hover(event):
+        vis = annot.get_visible()
+        if event.inaxes == ax:
+            cont, ind = sc.contains(event)
+            if cont:
+                update_annot(ind)
+                annot.set_visible(True)
+                fig.canvas.draw_idle()
+            else:
+                if vis:
+                    annot.set_visible(False)
+                    fig.canvas.draw_idle()
+    plt.axis(xmin=0, xmax=max(x)*1.01, ymin=0, ymax=max(value_scores)*1.03)
+    plt.xlabel("cost ($)")
+    plt.ylabel("value (score/$)")
+    fig.canvas.mpl_connect("motion_notify_event", hover)
+    plt.show()
+
+
+def plot_price_benchmark():
+    gpus = []
+    value_scores = []
+    y = []
+    x = []
+    with open("gpu_benchmark_price.txt", "r", encoding="ascii", errors="ignore") as file:
+        for line in file:
+            gpu = literal_eval(line)
+            benchmark = float(gpu[1])
+            price = float(gpu[2])
+            value_scores.append(benchmark/price)
+            y.append(benchmark)
+            x.append(price)
+            gpus.append(gpu)
+    fig,ax = plt.subplots()
+    sc = plt.scatter(x, y, c=value_scores, s=10, 
+                    norm=colors.LogNorm(), cmap=plt.cm.viridis)
+    annot = ax.annotate("", xy=(0,0), xytext=(-20,20), textcoords="offset points",
+                        bbox=dict(boxstyle="round", fc="w"),
+                        arrowprops=dict(arrowstyle="->"))
+    annot.set_visible(False)
+
+    def update_annot(ind):
+        pos = sc.get_offsets()[ind["ind"][0]]
+        annot.xy = pos
+        text = "{}, {}".format(" ".join(list(map(str,ind["ind"]))), 
+                            " ".join([gpus[n][0] for n in ind["ind"]]))
+        annot.set_text(text)
+        annot.get_bbox_patch().set_alpha(0.4)
+
+    def hover(event):
+        vis = annot.get_visible()
+        if event.inaxes == ax:
+            cont, ind = sc.contains(event)
+            if cont:
+                update_annot(ind)
+                annot.set_visible(True)
+                fig.canvas.draw_idle()
+            else:
+                if vis:
+                    annot.set_visible(False)
+                    fig.canvas.draw_idle()
+    plt.axis(xmin=0, xmax=max(x)*1.01, ymin=0, ymax=max(y)*1.03)
+    plt.xlabel("cost ($)")
+    plt.ylabel("benchmark")
+    fig.canvas.mpl_connect("motion_notify_event", hover)
+    plt.show()
+
+
 if __name__ == "__main__":
     # get_gpu_data()
-    plot_gpu_data()
+    plot_price_benchmark()
